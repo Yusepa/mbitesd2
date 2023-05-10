@@ -57,6 +57,8 @@ function collaborate_supports($feature) {
             return true;
         case FEATURE_MOD_PURPOSE:
             return MOD_PURPOSE_COMMUNICATION;
+        case FEATURE_COMPLETION_TRACKS_VIEWS:
+            return true;
         default:
             return null;
     }
