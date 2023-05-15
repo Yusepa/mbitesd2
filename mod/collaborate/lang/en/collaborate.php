@@ -49,5 +49,10 @@ $string['nocollaborates'] = 'No instances';
 // Mod form specific collaborate settings.
 $string['title'] = 'Activity title';
 
-//Event
+// Event
 $string['pageviewed'] = 'Activity title';
+
+
+// editors
+$string['title'] = 'Activity Title: ';
+$string['texteditor'] = 'Instructions {$a}';
