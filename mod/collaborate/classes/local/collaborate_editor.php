@@ -46,7 +46,7 @@ class collaborate_editor {
     /**
      * Names of the custom editors.
      *
-     * @return string array of editor names.
+     * @return array array of editor names.
      */
     public static function get_editor_names() {
         return ['instructionsa', 'instructionsb'];
