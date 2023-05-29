@@ -70,4 +70,31 @@ class collaborate_editor {
             'trusttext' => false
         ];
     }
+
+    public static function update_editor_instance_helper(\stdClass $collaborate, \mod_collaborate_mod_form $mform, $insert = false) {
+        global $DB;
+
+        // Save files and process editor content.
+        $cmid = $collaborate->coursemodule;
+        $context = \context_module::instance($cmid);
+        $options = self::get_editor_options($context);
+        $names = self::get_editor_names();
+
+        if ($insert) {
+            // We need to insert a record so that the 'file_postupdate_standard_editor' function has an id to work with.
+            $collaborate->id = $DB->insert_record('collaborate', $collaborate); // This is the Collaborate id.
+        }
+
+        foreach ($names as $name) {
+            $collaborate = \file_postupdate_standard_editor($collaborate, $name, $options,
+                $context, 'mod_collaborate', $name, $collaborate->id);
+        }
+
+        $success = $DB->update_record('collaborate', $collaborate); // This is Success/fail.
+        if ($insert) {
+            return $collaborate->id;
+        } else {
+            return $success;
+        }
+    }
 }

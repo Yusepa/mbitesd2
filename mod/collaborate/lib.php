@@ -33,6 +33,7 @@
  * @see https://github.com/richardjonesnz/moodle-mod_collaborate
  * @see https://github.com/gjb2048/moodle-mod_collaborate
  */
+use mod_collaborate\local\collaborate_editor;
 
 /* Moodle core API */
 
@@ -80,9 +81,13 @@ function collaborate_add_instance(stdClass $collaborate, mod_collaborate_mod_for
     global $DB;
 
     $collaborate->timecreated = time();
-    $collaborate->id = $DB->insert_record('collaborate', $collaborate);
+    // Add new instance with dummy data for the editor fields.
+    $collaborate->instructionsa ='a';
+    $collaborate->instructionsaformat = FORMAT_HTML;
+    $collaborate->instructionsb ='b';
+    $collaborate->instructionsbformat = FORMAT_HTML;
+    return collaborate_editor::update_editor_instance_helper($collaborate, $mform, true);
 
-    return $collaborate->id;
 }
 
 /**
@@ -102,9 +107,8 @@ function collaborate_update_instance(stdClass $collaborate, mod_collaborate_mod_
     $collaborate->timemodified = time();
     $collaborate->id = $collaborate->instance;
 
-    $result = $DB->update_record('collaborate', $collaborate);
+    return collaborate_editor::update_editor_instance_helper($collaborate, $mform);
 
-    return $result;
 }
 
 /**
@@ -383,7 +387,7 @@ function collaborate_update_grades(stdClass $collaborate, $userid = 0) {
  * @return array of [(string)filearea] => (string)description
  */
 function collaborate_get_file_areas($course, $cm, $context) {
-    return array();
+    return ['instructionsa' => 'Instructions for partner A', 'instructionsb' => 'Instructions for partner B'];
 }
 
 /**
