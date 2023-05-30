@@ -171,6 +171,7 @@ function collaborate_delete_instance($id) {
 
     // Delete any dependent records here.
     $DB->delete_records('collaborate', array('id' => $collaborate->id));
+    $DB->delete_records('collaborate_submissions', array('collaborateid' => $collaborate->id));
 
     return true;
 }
