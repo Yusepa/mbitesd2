@@ -36,6 +36,7 @@ $string['modulename_help'] = 'Use the collaborate module for... | The collaborat
 $string['collaborate:addinstance'] = 'Add a new collaborate';
 $string['collaborate:submit'] = 'Submit collaborate';
 $string['collaborate:view'] = 'View collaborate';
+$string['collaborate:viewreportstab'] = 'View reports tab';
 $string['collaboratefieldset'] = 'Custom example fieldset';
 $string['collaboratename'] = 'Name';
 $string['collaboratename_help'] = 'Updated: This is the content of the help tooltip associated with the collaboratename field.  Markdown syntax is supported.';
@@ -64,3 +65,10 @@ $string['studentb'] = 'Partner B';
 // Showpage.
 $string['user'] = 'Partner {$a}';
 $string['returnview'] = 'Volver';
+
+// Settings
+$string['enablereports'] = 'Enable reports';
+$string['enablereports_desc'] = 'Enable the reports to be viewed by teachers.';
+$string['reportstab'] = 'Reports';
+$string['viewtab'] = 'View';
+
