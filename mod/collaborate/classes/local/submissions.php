@@ -41,13 +41,15 @@ class submissions {
         global $DB, $USER;
         $exists = self::get_submission($cid, $USER->id, $page);
         if($exists) {
+            $data->timecreated = $exists->timecreated;
             $DB->delete_records('collaborate_submissions',
                 ['collaborateid' => $cid, 'userid' => $USER->id, 'page' => $page]);
+        }else{
+            $data->timecreated = time();
         }
         $options = collaborate_editor::get_editor_options($context);
 
         // Insert a dummy record and get the id.
-        $data->timecreated = time();
         $data->timemodified = time();
         $data->collaborateid = $cid;
         $data->userid = $USER->id;
