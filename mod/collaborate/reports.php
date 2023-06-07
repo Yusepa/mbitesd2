@@ -22,6 +22,9 @@
  * @see https://github.com/moodlehq/moodle-mod_collaborate
  * @see https://github.com/justinhunt/moodle-mod_collaborate */
 
+use mod_collaborate\output\reports;
+use core\output\notification;
+
 require_once('../../config.php');
 
 // The collaborate instance id.
@@ -38,6 +41,13 @@ $PAGE->set_url('/mod/collaborate/reports.php', ['cid' => $cid]);
 // Check the user is logged on (do this after set url).
 require_login($course, true, $cm);
 
+// Check the config.
+$config = get_config('mod_collaborate');
+if (!$config->enablereports) {
+    $returnurl = new moodle_url('/mod/collaborate/view.php', ['n' => $cid]);
+    redirect ($returnurl, get_string('nopermission', 'mod_collaborate'), null, notification::NOTIFY_ERROR);
+}
+
 // Set the page information.
 $PAGE->set_title(format_string($collaborate->name));
 $PAGE->set_heading(format_string($course->fullname));
@@ -46,6 +56,7 @@ $PAGE->set_pagelayout('course');
 // Prevent direct acess to the url.
 require_capability('mod/collaborate:viewreportstab', $context);
 
-$OUTPUT->header();
-echo 'reports';
-$OUTPUT->footer();
+echo $OUTPUT->header();
+// Create output object and render it using the template.
+echo $OUTPUT->render(new reports($collaborate, $cm->id));
+echo $OUTPUT->footer();

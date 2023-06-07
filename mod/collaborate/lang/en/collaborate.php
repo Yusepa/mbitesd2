@@ -76,3 +76,7 @@ $string['viewtab'] = 'View';
 $string['submission'] = 'Your submission';
 $string['submissionsave'] = 'Save submission';
 $string['submissionupdated'] = 'Submission updated';
+
+// Reports
+$string['reporttitle'] = 'Title';
+$string['id'] = 'Id';
