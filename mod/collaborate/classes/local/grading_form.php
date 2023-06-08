@@ -43,7 +43,7 @@ class grading_form extends \moodleform {
             $grades[$m] = $m;
         }
 
-        $mform->addElement('select', 'grade', 'tx1', $grades);
+        $mform->addElement('select', 'grade', get_string('grade', 'mod_collaborate'), $grades);
         $mform->setType('grade', PARAM_INT);
 
         // Add a save button.

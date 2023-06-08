@@ -80,3 +80,11 @@ $string['submissionupdated'] = 'Submission updated';
 // Reports
 $string['reporttitle'] = 'Title';
 $string['id'] = 'Id';
+
+// Grading form.
+$string['allocategrade'] = 'Allocate grade';
+$string['collaborate:gradesubmission'] = 'Grade submission';
+$string['currentgrade'] = 'Current grade: ';
+$string['submissiongraded'] = 'Submission graded';
+$string['gradingheader'] = 'Grade a submission';
+$string['grade'] = 'Grade';
