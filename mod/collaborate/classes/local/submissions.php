@@ -42,22 +42,29 @@ class submissions {
         $exists = self::get_submission($cid, $USER->id, $page);
         if($exists) {
             $data->timecreated = $exists->timecreated;
-            $DB->delete_records('collaborate_submissions',
-                ['collaborateid' => $cid, 'userid' => $USER->id, 'page' => $page]);
+            $data->timemodified = time();
+            $data->collaborateid = $exists->collaborateid;
+            $data->userid = $exists->userid;
+            $data->page = $exists->page;
+            $data->submission = $exists->submission;
+            $data->submissionformat = FORMAT_HTML;
+            $data->id = $exists->id;
         }else{
+            // Insert a dummy record and get the id.
             $data->timecreated = time();
+            $data->timemodified = time();
+            $data->collaborateid = $cid;
+            $data->userid = $USER->id;
+            $data->page = $page;
+            $data->submission = ' ';
+            $data->submissionformat = FORMAT_HTML;
+            $dataid = $DB->insert_record('collaborate_submissions', $data);
+            $data->id = $dataid;
         }
+
+
         $options = collaborate_editor::get_editor_options($context);
 
-        // Insert a dummy record and get the id.
-        $data->timemodified = time();
-        $data->collaborateid = $cid;
-        $data->userid = $USER->id;
-        $data->page = $page;
-        $data->submission = ' ';
-        $data->submissionformat = FORMAT_HTML;
-        $dataid = $DB->insert_record('collaborate_submissions', $data);
-        $data->id = $dataid;
 
         // Massage the data into a form for saving.
         $data = file_postupdate_standard_editor(
