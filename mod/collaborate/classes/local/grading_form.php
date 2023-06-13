@@ -39,12 +39,13 @@ class grading_form extends \moodleform {
 
         // Grades available.
         $grades = array();
-        for ($m = 0; $m <= 100; $m++) {
+        for ($m = 0; $m <= $this->_customdata['maxgrade']; $m++) {
             $grades[$m] = $m;
         }
 
         $mform->addElement('select', 'grade', get_string('grade', 'mod_collaborate'), $grades);
         $mform->setType('grade', PARAM_INT);
+        $mform->setDefault('grade', $this->_customdata['currentgrade']);
 
         // Add a save button.
         $this->add_action_buttons(false, get_string('submissionsave', 'mod_collaborate'));

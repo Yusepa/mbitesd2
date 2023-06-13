@@ -126,4 +126,20 @@ class submissions {
         global $DB;
         $DB->set_field('collaborate_submissions', 'grade', $grade, ['id' => $sid]);
     }
+    
+    /**
+     * The highest grade the user.
+     *
+     * @param int $sid The submission id.
+     * @return int The highest grade the user achieved if there are multiple submissions by the same user.
+     */
+    public static function grade_user($attempts) {
+        // We could use different strategies here.
+        $maxscore = 0;
+        foreach ($attempts as $attempt) {
+            $grade = $attempt->grade;
+            $maxscore = ($grade > $maxscore) ? $grade : $maxscore;
+        }
+        return $maxscore;
+    }
 }

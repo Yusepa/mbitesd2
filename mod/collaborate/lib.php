@@ -53,7 +53,7 @@ function collaborate_supports($feature) {
         case FEATURE_SHOW_DESCRIPTION:
             return true;
         case FEATURE_GRADE_HAS_GRADE:
-            return false;
+            return true;
         case FEATURE_BACKUP_MOODLE2:
             return true;
         case FEATURE_MOD_PURPOSE:
@@ -86,7 +86,12 @@ function collaborate_add_instance(stdClass $collaborate, mod_collaborate_mod_for
     $collaborate->instructionsaformat = FORMAT_HTML;
     $collaborate->instructionsb ='b';
     $collaborate->instructionsbformat = FORMAT_HTML;
-    return collaborate_editor::update_editor_instance_helper($collaborate, $mform, true);
+    collaborate_editor::update_editor_instance_helper($collaborate, $mform, true);
+
+    // Update gradebook.
+    collaborate_grade_item_update($collaborate);
+
+    return $collaborate->id;
 
 }
 
@@ -107,8 +112,13 @@ function collaborate_update_instance(stdClass $collaborate, mod_collaborate_mod_
     $collaborate->timemodified = time();
     $collaborate->id = $collaborate->instance;
 
-    return collaborate_editor::update_editor_instance_helper($collaborate, $mform);
+    // Grade items in settings may have changed.
+    collaborate_grade_item_update($collaborate);
+    collaborate_update_grades($collaborate, 0);
 
+    $success = collaborate_editor::update_editor_instance_helper($collaborate, $mform);
+
+    return $success;
 }
 
 /**
@@ -324,9 +334,10 @@ function collaborate_scale_used_anywhere($scaleid) {
  * Needed by {@link grade_update_mod_grades()}.
  *
  * @param stdClass $collaborate instance object with extra cmidnumber and modname property
+ * @param string / array $grades reset grades in the gradebook if 'reset' or an array of grades.
  * @return void
  */
-function collaborate_grade_item_update(stdClass $collaborate) {
+function collaborate_grade_item_update(stdClass $collaborate, $grades = null) {
     global $CFG;
     require_once($CFG->libdir.'/gradelib.php');
     $item = array();
@@ -342,9 +353,12 @@ function collaborate_grade_item_update(stdClass $collaborate) {
     } else {
         $item['gradetype'] = GRADE_TYPE_NONE;
     }
+    if ($grades === 'reset') {
+        $item['reset'] = true;
+        $grades = null;
+    }
 
-    grade_update('mod/collaborate', $collaborate->course, 'mod', 'collaborate',
-        $collaborate->id, 0, null, $item);
+    grade_update('mod/collaborate', $collaborate->course, 'mod', 'collaborate', $collaborate->id, 0, $grades, $item);
 }
 /**
  * Delete grade item for given collaborate instance
@@ -359,19 +373,97 @@ function collaborate_grade_item_delete($collaborate) {
             $collaborate->id, 0, null, array('deleted' => 1));
 }
 /**
- * Update collaborate grades in the gradebook
+ * Update collaborate grades in the gradebook.
  *
  * Needed by {@link grade_update_mod_grades()}.
  *
- * @param stdClass $collaborate instance object with extra cmidnumber and modname property
- * @param int $userid update grade of specific user only, 0 means all participants
+ * @param stdClass $collaborate instance object with extra cmidnumber and modname property.
+ * @param int $userid update grade of specific user only, 0 means all participants.
  */
 function collaborate_update_grades(stdClass $collaborate, $userid = 0) {
-    global $CFG, $DB;
+    global $CFG;
     require_once($CFG->libdir.'/gradelib.php');
+
     // Populate array of grade objects indexed by userid.
+    $grades = collaborate_get_user_grades($collaborate, $userid);
+
+    // Do we have grades?
+    if ($grades) {
+        collaborate_grade_item_update($collaborate, $grades);
+    } else if ($userid) {
+        // Single user specified, create initial grade item.
+        $grade = new stdClass();
+        $grade->userid = $userid;
+        $grade->rawgrade = null;
+        collaborate_grade_item_update($collaborate, $grade);
+    } else {
+        collaborate_grade_item_update($collaborate);
+    }
+}
+/**
+ * Get the collaborate grades.
+ *
+ * Needed by {@link collaborate_update_grades()}.
+ *
+ * @param stdClass $collaborate instance object with extra cmidnumber and modname property.
+ * @param int $userid update grade of specific user only, 0 means all participants.
+ */
+function collaborate_get_user_grades($collaborate, $userid = 0) {
+    global $DB;
+
     $grades = array();
-    grade_update('mod/collaborate', $collaborate->course, 'mod', 'collaborate', $collaborate->id, 0, $grades);
+    if (empty($userid)) {
+        // All user attempts for this collaborate instance are in the submissions table.
+        $sql = "SELECT a.id, a.collaborateid, a.userid, a.grade, a.timecreated 
+                FROM {collaborate_submissions} a 
+                WHERE a.collaborateid = :cid 
+                GROUP BY a.userid";
+
+        $slusers = $DB->get_records_sql($sql, ['cid' => $collaborate->id]);
+        if ($slusers) {
+            foreach ($slusers as $sluser) {
+                $grades[$sluser->userid] = new stdClass();
+                $grades[$sluser->userid]->id = $sluser->id;
+                $grades[$sluser->userid]->userid = $sluser->userid;
+
+                // Get this users attempts.
+                $sql = "SELECT a.id, a.collaborateid, a.userid, a.grade, a.timecreated 
+                        FROM {collaborate_submissions} a 
+                        INNER JOIN {user} u 
+                        ON u.id = a.userid 
+                        WHERE a.collaborateid = :cid 
+                        AND u.id = :uid";
+                $attempts = $DB->get_records_sql($sql, ['cid' => $collaborate->id, 'uid' => $sluser->userid]);
+                // Apply grading method.
+                $grades[$sluser->userid]->rawgrade = \mod_collaborate\local\submissions::grade_user($attempts);
+            }
+        } else {
+            return false;
+        }
+
+    } else {
+        // User grade for userid.
+        $sql = "SELECT a.id, a.collaborateid, a.userid, a.grade, a.timecreated 
+                FROM {collaborate_submissions} a 
+                INNER JOIN {user} u 
+                ON u.id = a.userid 
+                WHERE a.collaborateid = :cid 
+                AND u.id = :uid";
+
+        $attempts = $DB->get_records_sql($sql,
+                array('cid' => $collaborate->id, 'uid' => $userid));
+        if (!$attempts) {
+            return false; // No attempt yet.
+        }
+        // Update grades for user.
+        $grades[$userid] = new stdClass();
+        $grades[$userid]->id = $collaborate->id;
+        $grades[$userid]->userid = $userid;
+        // Using selected grading strategy here.
+        $grades[$userid]->rawgrade = \mod_collaborate\local\submissions::grade_user($attempts);
+    }
+
+    return $grades;
 }
 
 /* File API */
