@@ -71,6 +71,7 @@ $string['enablereports'] = 'Enable reports';
 $string['enablereports_desc'] = 'Enable the reports to be viewed by teachers.';
 $string['reportstab'] = 'Reports';
 $string['viewtab'] = 'View';
+$string['namechange'] = 'Change name';
 
 // Submissions form.
 $string['submission'] = 'Your submission';
