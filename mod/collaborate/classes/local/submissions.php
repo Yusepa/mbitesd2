@@ -41,13 +41,7 @@ class submissions {
         global $DB, $USER;
         $exists = self::get_submission($cid, $USER->id, $page);
         if($exists) {
-            $data->timecreated = $exists->timecreated;
             $data->timemodified = time();
-            $data->collaborateid = $exists->collaborateid;
-            $data->userid = $exists->userid;
-            $data->page = $exists->page;
-            $data->submission = $exists->submission;
-            $data->submissionformat = FORMAT_HTML;
             $data->id = $exists->id;
         }else{
             // Insert a dummy record and get the id.
@@ -62,9 +56,7 @@ class submissions {
             $data->id = $dataid;
         }
 
-
         $options = collaborate_editor::get_editor_options($context);
-
 
         // Massage the data into a form for saving.
         $data = file_postupdate_standard_editor(
