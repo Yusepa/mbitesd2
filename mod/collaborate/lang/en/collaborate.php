@@ -80,6 +80,7 @@ $string['submissionupdated'] = 'Submission updated';
 // Reports
 $string['reporttitle'] = 'Title';
 $string['id'] = 'Id';
+$string['exportlink'] = 'Export submissions to PDF';
 
 // Grading form.
 $string['allocategrade'] = 'Allocate grade';

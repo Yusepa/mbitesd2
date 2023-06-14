@@ -64,6 +64,11 @@ class reports implements renderable, templatable {
         $data->url_reports = $reports->out(false);
         $data->url_view = $view->out(false);
 
+
+        // Export data link.
+        $export = new moodle_url('/mod/collaborate/export.php', ['cid' => $this->collaborate->id]);
+        $data->url_export = $export->out(false); 
+
         return $data;
     }
     
@@ -105,7 +110,7 @@ class reports implements renderable, templatable {
 
             $submissions[] = $data;
         }
-
+            
         return $submissions;
     }
 
