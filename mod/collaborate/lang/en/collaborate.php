@@ -90,3 +90,6 @@ $string['currentgrade'] = 'Current grade: ';
 $string['submissiongraded'] = 'Submission graded';
 $string['gradingheader'] = 'Grade a submission';
 $string['grade'] = 'Grade';
+
+// Scheduled Task
+$string['exportall'] = 'Export all';
