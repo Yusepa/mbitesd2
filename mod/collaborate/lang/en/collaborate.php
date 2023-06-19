@@ -91,5 +91,8 @@ $string['submissiongraded'] = 'Submission graded';
 $string['gradingheader'] = 'Grade a submission';
 $string['grade'] = 'Grade';
 
-// Scheduled Task
+// Scheduled Task.
 $string['exportall'] = 'Export all';
+
+// Adhoc task.
+$string['namechanged'] = 'Collaborate \'{$a->id}\'s name has changed to \'{$a->name}\'.';
