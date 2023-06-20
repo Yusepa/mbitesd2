@@ -96,3 +96,7 @@ $string['exportall'] = 'Export all';
 
 // Adhoc task.
 $string['namechanged'] = 'Collaborate \'{$a->id}\'s name has changed to \'{$a->name}\'.';
+
+// Events
+$string['submission_submitted'] = 'Submission submitted';
+$string['submission_graded'] = 'Submission graded';

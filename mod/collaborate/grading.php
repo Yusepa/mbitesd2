@@ -71,6 +71,13 @@ if ($data = $form->get_data()) {
     // Save the data here.
     submissions::update_grade($sid, $data->grade);
 
+    // Log the submission submitted event.
+    $event = \mod_collaborate\event\submission_graded::create(
+            ['context' => $PAGE->context, 'objectid' => $PAGE->cm->instance]);
+    $event->add_record_snapshot('course', $PAGE->course);
+    $event->add_record_snapshot($PAGE->cm->modname, $collaborate);
+    $event->trigger();
+
     // Update the gradebook.
     collaborate_update_grades($collaborate);
     
