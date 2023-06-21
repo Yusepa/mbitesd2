@@ -609,3 +609,47 @@ function collaborate_do_adhoc_task(progress_trace $trace, $data) {
         purge_other_caches();  // Purge the 'file and miscellaneous' cache so that our change(s) are seen.
     }
 }
+
+/**
+ * Rescale all grades for this activity and push the new grades to the gradebook.
+ *
+ * @param stdClass $course Course db record.
+ * @param stdClass $cm Course module db record.
+ * @param float $oldmin
+ * @param float $oldmax
+ * @param float $newmin
+ * @param float $newmax
+ */
+function collaborate_rescale_activity_grades($course, $cm, $oldmin, $oldmax, $newmin, $newmax) {
+    global $DB;
+
+    if ($oldmax <= $oldmin) {
+        // Grades cannot be scaled.
+        return false;
+    }
+    $scale = ($newmax - $newmin) / ($oldmax - $oldmin);
+    if (($newmax - $newmin) <= 1) {
+        // We would lose too much precision, lets bail.
+        return false;
+    }
+
+    $params = array(
+        'p1' => $oldmin,
+        'p2' => $scale,
+        'p3' => $newmin,
+        'a' => $cm->instance
+    );
+
+    // Only rescale grades that are greater than or equal to 0.  Anything else is a special value.
+    $sql = 'UPDATE {collaborate_submissions} set grade = (((grade - :p1) * :p2) + :p3) where collaborateid = :a and grade >= 0';
+    $dbupdate = $DB->execute($sql, $params);
+    if (!$dbupdate) {
+        return false;
+    }
+
+    // Now re-push all grades to the gradebook.
+    $collaborate = $DB->get_record('collaborate', ['id' => $cm->instance]);
+    collaborate_update_grades($collaborate);
+
+    return true;
+}
