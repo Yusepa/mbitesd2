@@ -175,8 +175,29 @@ function collaborate_update_events($collaborate, $override = null) {
 function collaborate_delete_instance($id) {
     global $DB;
 
-    if (! $collaborate = $DB->get_record('collaborate', array('id' => $id))) {
+    if (!$collaborate = $DB->get_record('collaborate', array('id' => $id))) {
         return false;
+    }
+
+    // Delete all files from collaborate and the submissions.
+    $cm = get_coursemodule_from_instance('collaborate', $id, $collaborate->course, false, MUST_EXIST);
+    $context = \context_module::instance($cm->id);
+
+    $fs = get_file_storage();
+    // Item id is the id in the respective table.
+    $cfileareas = mod_collaborate\local\collaborate_editor::get_editor_names();
+    foreach ($cfileareas as $cfilearea) {
+        $fs->delete_area_files($context->id, 'mod_collaborate', $cfilearea, $collaborate->id);
+    }
+
+    // Two different ways...
+    //$submissons = $DB->get_records('collaborate_submissions', array('collaborateid' => $collaborate->id));
+    $sql = "SELECT s.id
+            FROM {collaborate_submissions} s
+            WHERE s.collaborateid = :cid";
+    $submissons = $DB->get_records_sql($sql, ['cid' => $collaborate->id]);
+    foreach ($submissons as $submisson) {
+        $fs->delete_area_files($context->id, 'mod_collaborate', 'submission', $submisson->id);
     }
 
     // Delete any dependent records here.
