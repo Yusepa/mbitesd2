@@ -49,22 +49,42 @@ class backup_collaborate_activity_structure_step extends backup_activity_structu
         $collaborate = new backup_nested_element('collaborate',
             array('id'),
             array(
-                'course', 'name', 'intro',
-                'introformat', 'title', 'timecreated',
-                'timemodified'
+                'course', 'name', 'intro','introformat','instructionsa', 'instructionsaformat',
+                'instructionsb', 'instructionsbformat', 'title', 'timecreated','timemodified'
             )
         );
+
+        // Define the child element.
+        $submissions = new backup_nested_element('submissions');
+        $submission = new backup_nested_element('submission', array('id'),
+            array(
+                'collaborateid', 'page', 'userid', 'submission', 'submissionformat',
+                'timecreated', 'timemodified', 'grade')
+        );
+
+        // Build the tree.
+        $collaborate->add_child($submissions);
+        $submissions->add_child($submission);
 
         // If we had more elements, we would build the tree here.
 
         // Define data sources.
         $collaborate->set_source_table('collaborate', array('id' => backup::VAR_ACTIVITYID));
 
+        // Backup submissions table if backing up user data.
+        if ($userinfo) {
+            $submission->set_source_table('collaborate_submissions',
+                array('collaborateid' => backup::VAR_PARENTID));
+        }
+
         /* If we were referring to other tables, we would annotate the relation
            with the element's annotate_ids() method. */
 
         // Define file annotations (we do not use itemid in this example).
         $collaborate->annotate_files('mod_collaborate', 'intro', null);
+        $collaborate->annotate_files('mod_collaborate', 'instructionsa', null);
+        $collaborate->annotate_files('mod_collaborate', 'instructionsb', null);
+        $submission->annotate_files('mod_collaborate', 'submission', 'id');
 
         // Return the root element (collaborate), wrapped into standard activity structure.
         return $this->prepare_activity_structure($collaborate);

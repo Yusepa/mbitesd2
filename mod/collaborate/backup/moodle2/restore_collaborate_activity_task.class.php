@@ -64,6 +64,9 @@ class restore_collaborate_activity_task extends restore_activity_task {
         $contents = array();
 
         $contents[] = new restore_decode_content('collaborate', array('intro'), 'collaborate');
+        $contents[] = new restore_decode_content('collaborate', array('instructionsa'), 'collaborate');
+        $contents[] = new restore_decode_content('collaborate', array('instructionsb'), 'collaborate');
+        $contents[] = new restore_decode_content('collaborate_submissions', array('submission'), 'collaborate_submission');
 
         return $contents;
     }
@@ -94,6 +97,7 @@ class restore_collaborate_activity_task extends restore_activity_task {
         $rules[] = new restore_log_rule('collaborate', 'add', 'view.php?id={course_module}', '{collaborate}');
         $rules[] = new restore_log_rule('collaborate', 'update', 'view.php?id={course_module}', '{collaborate}');
         $rules[] = new restore_log_rule('collaborate', 'view', 'view.php?id={course_module}', '{collaborate}');
+        $rules[] = new restore_log_rule('collaborate', 'edit', 'view.php?id={course_module}', '{collaborate}');
 
         return $rules;
     }
